@@ -1,0 +1,240 @@
+{
+    "1": {
+        "Category": "Essential",
+        "Activity": "Sleeping",
+        "Duration": "360",
+        "Start": "0",
+        "End": "360"
+    },
+    "2": {
+        "Category": "Nothing",
+        "Activity": "Laying in bed waking up",
+        "Duration": "15",
+        "Start": "360",
+        "End": "375"
+    },
+    "3": {
+        "Category": "Productive",
+        "Activity": "Starting day",
+        "Duration": "5",
+        "Start": "375",
+        "End": "380"
+    },
+    "4": {
+        "Category": "Productive",
+        "Activity": "Cooking",
+        "Duration": "10",
+        "Start": "380",
+        "End": "390"
+    },
+    "5": {
+        "Category": "Essential",
+        "Activity": "Eating",
+        "Duration": "10",
+        "Start": "390",
+        "End": "400"
+    },
+    "6": {
+        "Category": "Leisure",
+        "Activity": "Entertainment",
+        "Duration": "10",
+        "Start": "400",
+        "End": "410"
+    },
+    "7": {
+        "Category": "Education",
+        "Activity": "Personal Education",
+        "Duration": "60",
+        "Start": "410",
+        "End": "470"
+    },
+    "8": {
+        "Category": "Essential",
+        "Activity": "Bathroom",
+        "Duration": "10",
+        "Start": "470",
+        "End": "480"
+    },
+    "9": {
+        "Category": "Productive",
+        "Activity": "Spreadsheets",
+        "Duration": "10",
+        "Start": "480",
+        "End": "490"
+    },
+    "10": {
+        "Category": "Productive",
+        "Activity": "Driving or Chores",
+        "Duration": "20",
+        "Start": "490",
+        "End": "510"
+    },
+    "11": {
+        "Category": "Hobby",
+        "Activity": "Music",
+        "Duration": "80",
+        "Start": "510",
+        "End": "590"
+    },
+    "12": {
+        "Category": "Hobby",
+        "Activity": "Art",
+        "Duration": "80",
+        "Start": "590",
+        "End": "670"
+    },
+    "13": {
+        "Category": "Hobby",
+        "Activity": "Writing",
+        "Duration": "80",
+        "Start": "670",
+        "End": "750"
+    },
+    "14": {
+        "Category": "Productive",
+        "Activity": "Lunch Break [Going to Get Lunch]",
+        "Duration": "10",
+        "Start": "750",
+        "End": "760"
+    },
+    "15": {
+        "Category": "Essential",
+        "Activity": "Lunch Break [Eating Lunch]",
+        "Duration": "10",
+        "Start": "760",
+        "End": "770"
+    },
+    "16": {
+        "Category": "Leisure",
+        "Activity": "Lunch Break [Entertainment]",
+        "Duration": "30",
+        "Start": "770",
+        "End": "800"
+    },
+    "17": {
+        "Category": "Productive",
+        "Activity": "Lunch Break [Getting Back]",
+        "Duration": "10",
+        "Start": "800",
+        "End": "810"
+    },
+    "18": {
+        "Category": "Hobby",
+        "Activity": "Programming",
+        "Duration": "60",
+        "Start": "810",
+        "End": "870"
+    },
+    "19": {
+        "Category": "Hobby",
+        "Activity": "Video Production",
+        "Duration": "30",
+        "Start": "870",
+        "End": "900"
+    },
+    "20": {
+        "Category": "Leisure",
+        "Activity": "Gaming",
+        "Duration": "90",
+        "Start": "900",
+        "End": "990"
+    },
+    "21": {
+        "Category": "Leisure",
+        "Activity": "Entertainment",
+        "Duration": "60",
+        "Start": "990",
+        "End": "1050"
+    },
+    "22": {
+        "Category": "Productive",
+        "Activity": "Driving or Chores",
+        "Duration": "20",
+        "Start": "1050",
+        "End": "1070"
+    },
+    "23": {
+        "Category": "Essential",
+        "Activity": "Exercise",
+        "Duration": "30",
+        "Start": "1070",
+        "End": "1100"
+    },
+    "24": {
+        "Category": "Essential",
+        "Activity": "Bathroom (Shower)",
+        "Duration": "10",
+        "Start": "1100",
+        "End": "1110"
+    },
+    "25": {
+        "Category": "Productive",
+        "Activity": "Cooking",
+        "Duration": "10",
+        "Start": "1110",
+        "End": "1120"
+    },
+    "26": {
+        "Category": "Essential",
+        "Activity": "Eating",
+        "Duration": "20",
+        "Start": "1120",
+        "End": "1140"
+    },
+    "27": {
+        "Category": "Leisure",
+        "Activity": "Gaming",
+        "Duration": "60",
+        "Start": "1140",
+        "End": "1200"
+    },
+    "28": {
+        "Category": "Leisure",
+        "Activity": "Entertainment",
+        "Duration": "20",
+        "Start": "1200",
+        "End": "1220"
+    },
+    "29": {
+        "Category": "Social",
+        "Activity": "Talking",
+        "Duration": "30",
+        "Start": "1220",
+        "End": "1250"
+    },
+    "30": {
+        "Category": "Leisure",
+        "Activity": "Reading",
+        "Duration": "30",
+        "Start": "1250",
+        "End": "1280"
+    },
+    "31": {
+        "Category": "Productive",
+        "Activity": "Spreadsheets",
+        "Duration": "20",
+        "Start": "1280",
+        "End": "1300"
+    },
+    "32": {
+        "Category": "Productive",
+        "Activity": "Getting into bed",
+        "Duration": "5",
+        "Start": "1300",
+        "End": "1305"
+    },
+    "33": {
+        "Category": "Nothing",
+        "Activity": "Laying in bed falling asleep",
+        "Duration": "15",
+        "Start": "1305",
+        "End": "1320"
+    },
+    "34": {
+        "Category": "Essential",
+        "Activity": "Sleeping",
+        "Duration": "120",
+        "Start": "1320",
+        "End": "1440"
+    }
+}
