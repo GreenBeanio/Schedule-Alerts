@@ -636,14 +636,16 @@ class MainWindow(QMainWindow):
         self.main_window.setStyleSheet(f"background-color: {self.current_color}")
 
     # Stopping Schedule
-    def Stop_Schedule(self, button):
-        # If the yes button is pressed stop, if not continue
-        if button.text() == "&Yes":
-            # Stop the timer
-            self.timer.stop()
-            # Initializing Everything
-            self.Reset(True)
-            ###### Here we will close and go back to the main section, or completely close
+    def Stop_Schedule(self):
+        # Stop the timer
+        self.timer.stop()
+        # Initializing Everything
+        self.Reset(True)
+        # Open a new opening window
+        self.w = Opening_Window()
+        self.w.show()
+        # Closing main window
+        self.close()
 
     # Resets Everything
     def Reset(self, Clear_Type):
@@ -725,29 +727,19 @@ class MainWindow(QMainWindow):
     # Button Functions
 
     def Open_Statistics(self):
-        # Making and showing a new window
-        self.w = Statistics_View()
+        # Making and showing a new window. Sending over the timer as well so that it's synchronized.
+        self.w = Statistics_View(self.timer)
         self.w.show()
 
     def Open_Options(self):
-        # Making and showing a new window. Send over this main window with it so that it can send back calls
+        # Making and showing a new window. Send over this main window as well
         self.w = Options_Window(self)
         self.w.show()
 
     def Open_Stop(self):
-        # Setting up gui
-        dialog = QMessageBox(
-            text="This will stop the schedule. Are you sure?", parent=self
-        )
-        dialog.setWindowTitle("Confirmation")
-        dialog.setIcon(QMessageBox.Icon.Question)
-        dialog.setStandardButtons(
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-        )
-        # Checking the answer of the window
-        dialog.buttonClicked.connect(self.Stop_Schedule)
-        # Closing the window
-        dialog.exec()
+        # Making and showing a new window. Send over this main window with it so that it can send back calls
+        self.w = Stop_Window(self)
+        self.w.show()
 
     def Open_Schedule(self):
         # Making and showing a new window
@@ -826,7 +818,7 @@ class Schedule_View(QWidget):
 # Class for the Statistics View
 class Statistics_View(QWidget):
     # Init Function
-    def __init__(self):
+    def __init__(self, main_timer):
         super().__init__()
         # region GUI Items
         self.Main_Label = QLabel(f"<h1>{Schedule_Type} Statitsics</h1>", parent=self)
@@ -852,7 +844,6 @@ class Statistics_View(QWidget):
             self.total_time = QTableWidgetItem(
                 datetime.utcfromtimestamp(total_schedule[x]).strftime("%H:%M:%S")
             )
-
             self.statistics_table.setItem(self.index_position, 0, self.category)
             self.statistics_table.setItem(self.index_position, 1, self.elapsed_time)
             self.statistics_table.setItem(self.index_position, 2, self.remaining_time)
@@ -880,13 +871,81 @@ class Statistics_View(QWidget):
         self.setLayout(self.Statistics_Layout)
         self.setMinimumSize(self.minimumSizeHint())
         self.setMaximumSize(self.sizeHint())
+        # Setting up a timer event based off of main timer
+        main_timer.timeout.connect(self.Timing)
+
+    # Timing Logic
+    def Timing(self):
+        # Updating table entries
+        for x in elapsed_schedule:
+            self.index_position = list(elapsed_schedule.keys()).index(x)
+            self.category = QTableWidgetItem(str(x))
+            self.elapsed_time = QTableWidgetItem(
+                datetime.utcfromtimestamp(elapsed_schedule[x]).strftime("%H:%M:%S")
+            )
+            self.remaining_time = QTableWidgetItem(
+                datetime.utcfromtimestamp(remaining_schedule[x]).strftime("%H:%M:%S")
+            )
+            self.total_time = QTableWidgetItem(
+                datetime.utcfromtimestamp(total_schedule[x]).strftime("%H:%M:%S")
+            )
+            self.statistics_table.setItem(self.index_position, 0, self.category)
+            self.statistics_table.setItem(self.index_position, 1, self.elapsed_time)
+            self.statistics_table.setItem(self.index_position, 2, self.remaining_time)
+            self.statistics_table.setItem(self.index_position, 3, self.total_time)
 
 
 # Class for the Stopping Prompt
+class Stop_Window(QWidget):
+    # Init Function with the main window being carried over
+    def __init__(self, main_window):
+        super().__init__()
+        # region GUI Items
+        self.Main_Label = QLabel(
+            "This will stop the schedule. Are you sure?", parent=self
+        )
+        self.Yes_Button = QPushButton("Yes", parent=self)
+        self.No_Button = QPushButton("No", parent=self)
+        # Setting up the layout
+        self.Options_Layout = QGridLayout()
+        self.Main_Label.setMinimumSize(150, 0)
+        self.Main_Label.setFont(General_Font)
+        self.Options_Layout.addWidget(
+            self.Main_Label, 0, 0, 1, 4, alignment=Qt.AlignmentFlag.AlignCenter
+        )
+        self.Yes_Button.setMinimumSize(100, 0)
+        self.Yes_Button.setFont(General_Font)
+        self.Options_Layout.addWidget(
+            self.Yes_Button, 1, 1, 1, 1, alignment=Qt.AlignmentFlag.AlignCenter
+        )
+        self.No_Button.setMinimumSize(100, 0)
+        self.No_Button.setFont(General_Font)
+        self.Options_Layout.addWidget(
+            self.No_Button, 1, 2, 1, 1, alignment=Qt.AlignmentFlag.AlignCenter
+        )
+        # Setting up window
+        self.setWindowIcon(QIcon(path_to_icon))
+        self.setWindowTitle("Confirmation")
+        self.setLayout(self.Options_Layout)
+        self.setMinimumSize(self.minimumSizeHint())
+        self.setMaximumSize(self.sizeHint())
+        # endregion GUI Items
+        # Button Events. Have to use lambda to pass arguments through the connect
+        self.Yes_Button.clicked.connect(lambda: self.User_Answer("Yes", main_window))
+        self.No_Button.clicked.connect(lambda: self.User_Answer("No", main_window))
+
+    # Return answer to main window
+    def User_Answer(self, result, main_window):
+        # If yes stop the main window
+        if result == "Yes":
+            main_window.Stop_Schedule()
+        # Close this window
+        self.close()
+
 
 # Class for the Options Prompt
 class Options_Window(QWidget):
-    # Init Function with the main window attacked
+    # Init Function with the main window attached
     def __init__(self, main_window):
         super().__init__()
         # region GUI Items
