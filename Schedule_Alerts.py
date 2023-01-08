@@ -77,6 +77,16 @@ total_schedule = {
     "Social": 0,
     "Nothing": 0,
 }  # For holding the totals from the schedule
+remaining_schedule = {
+    "Work": 0,
+    "Education": 0,
+    "Hobby": 0,
+    "Essential": 0,
+    "Productive": 0,
+    "Lesiure": 0,
+    "Social": 0,
+    "Nothing": 0,
+}  # For holding the remaining time from the schedule
 General_Font = QFont("Times", 12)
 # endregion Variables
 
@@ -382,6 +392,9 @@ class MainWindow(QMainWindow):
         total_schedule["Lesiure"] = self.total_leisure
         total_schedule["Social"] = self.total_social
         total_schedule["Nothing"] = self.total_nothing
+        # Copying over the total times to begin the remaining
+        global remaining_schedule
+        remaining_schedule = total_schedule.copy()
         # Saving variables
         global total_steps
         total_steps = len(self.formatted)
@@ -454,6 +467,7 @@ class MainWindow(QMainWindow):
         # Advancing time
         seconds_today += 1
         self.save_to_elapsed(current_category, 1)
+        self.save_to_remaining(current_category, 1)
         # Updating short labels
         self.update_short_labels()
 
@@ -480,12 +494,14 @@ class MainWindow(QMainWindow):
                 # Getting the amount of passed time from the current activity
                 self.schedule_duration = time - self.start_time
                 self.save_to_elapsed(self.schedule_category, self.schedule_duration)
+                self.save_to_remaining(self.schedule_category, self.schedule_duration)
                 # Returning the step
                 return x
             else:
                 # Adding the elapsed time to the elapsed dictionary
                 self.schedule_duration = schedule_data[x]["Duration"]
                 self.save_to_elapsed(self.schedule_category, self.schedule_duration)
+                self.save_to_remaining(self.schedule_category, self.schedule_duration)
 
     # Save to elapsed dictionary
     def save_to_elapsed(self, Elapsed_Category, Elapsed_Time):
@@ -508,6 +524,28 @@ class MainWindow(QMainWindow):
             elapsed_schedule["Social"] += Elapsed_Time
         elif Elapsed_Category == "Nothing":
             elapsed_schedule["Nothing"] += Elapsed_Time
+
+    # Save to the remaining dictionary
+    def save_to_remaining(self, Elapsed_Category, Elapsed_Time):
+        # Global Dictionary
+        global remaining_schedule
+        # Math to put it in the right category
+        if Elapsed_Category == "Work":
+            remaining_schedule["Work"] -= Elapsed_Time
+        elif Elapsed_Category == "Education":
+            remaining_schedule["Education"] -= Elapsed_Time
+        elif Elapsed_Category == "Hobby":
+            remaining_schedule["Hobby"] -= Elapsed_Time
+        elif Elapsed_Category == "Essential":
+            remaining_schedule["Essential"] -= Elapsed_Time
+        elif Elapsed_Category == "Productive":
+            remaining_schedule["Productive"] -= Elapsed_Time
+        elif Elapsed_Category == "Leisure":
+            remaining_schedule["Lesiure"] -= Elapsed_Time
+        elif Elapsed_Category == "Social":
+            remaining_schedule["Social"] -= Elapsed_Time
+        elif Elapsed_Category == "Nothing":
+            remaining_schedule["Nothing"] -= Elapsed_Time
 
     # Getting the next time
     def get_next_time(self):
@@ -647,6 +685,17 @@ class MainWindow(QMainWindow):
             "Social": 0,
             "Nothing": 0,
         }
+        global remaining_schedule
+        remaining_schedule = {
+            "Work": 0,
+            "Education": 0,
+            "Hobby": 0,
+            "Essential": 0,
+            "Productive": 0,
+            "Lesiure": 0,
+            "Social": 0,
+            "Nothing": 0,
+        }
         global seconds_today
         seconds_today = 0
         global current_step
@@ -676,7 +725,9 @@ class MainWindow(QMainWindow):
     # Button Functions
 
     def Open_Statistics(self):
-        pass
+        # Making and showing a new window
+        self.w = Statistics_View()
+        self.w.show()
 
     def Open_Options(self):
         # Making and showing a new window. Send over this main window with it so that it can send back calls
@@ -773,6 +824,62 @@ class Schedule_View(QWidget):
 
 
 # Class for the Statistics View
+class Statistics_View(QWidget):
+    # Init Function
+    def __init__(self):
+        super().__init__()
+        # region GUI Items
+        self.Main_Label = QLabel(f"<h1>{Schedule_Type} Statitsics</h1>", parent=self)
+        # Setting up Table
+        self.statistics_table = QTableWidget()
+        self.statistics_table.setRowCount(len(elapsed_schedule))
+        self.statistics_table.setColumnCount(4)
+        self.statistics_table.setHorizontalHeaderLabels(
+            ["Category", "Elapsed", "Remaining", "Total"]
+        )
+        self.statistics_table.setEditTriggers(
+            QTableWidget.EditTrigger(0)
+        )  # Disables editing
+        for x in elapsed_schedule:
+            self.index_position = list(elapsed_schedule.keys()).index(x)
+            self.category = QTableWidgetItem(str(x))
+            self.elapsed_time = QTableWidgetItem(
+                datetime.utcfromtimestamp(elapsed_schedule[x]).strftime("%H:%M:%S")
+            )
+            self.remaining_time = QTableWidgetItem(
+                datetime.utcfromtimestamp(remaining_schedule[x]).strftime("%H:%M:%S")
+            )
+            self.total_time = QTableWidgetItem(
+                datetime.utcfromtimestamp(total_schedule[x]).strftime("%H:%M:%S")
+            )
+
+            self.statistics_table.setItem(self.index_position, 0, self.category)
+            self.statistics_table.setItem(self.index_position, 1, self.elapsed_time)
+            self.statistics_table.setItem(self.index_position, 2, self.remaining_time)
+            self.statistics_table.setItem(self.index_position, 3, self.total_time)
+        # Setting up the layout
+        self.Statistics_Layout = QGridLayout()
+        self.Main_Label.setMinimumSize(100, 0)
+        self.Main_Label.setFont(General_Font)
+        self.Statistics_Layout.addWidget(
+            self.Main_Label, 0, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignCenter
+        )
+        self.statistics_table.setColumnWidth(0, 90)
+        self.statistics_table.setColumnWidth(1, 90)
+        self.statistics_table.setColumnWidth(2, 90)
+        self.statistics_table.setColumnWidth(3, 90)
+        self.statistics_table.setMinimumSize(380, 270)
+        self.statistics_table.setFont(General_Font)
+        self.Statistics_Layout.addWidget(
+            self.statistics_table, 1, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignCenter
+        )
+        # endregion GUI Items
+        # Setting up window
+        self.setWindowIcon(QIcon(path_to_icon))
+        self.setWindowTitle("Schedule")
+        self.setLayout(self.Statistics_Layout)
+        self.setMinimumSize(self.minimumSizeHint())
+        self.setMaximumSize(self.sizeHint())
 
 
 # Class for the Stopping Prompt
