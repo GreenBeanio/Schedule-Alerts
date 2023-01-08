@@ -4,7 +4,7 @@ from datetime import datetime
 from genericpath import exists
 import sys
 import simpleaudio as sa
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt, QTimer, QObject
 from PyQt6.QtWidgets import (
     QApplication,
     QLabel,
@@ -33,6 +33,9 @@ total_steps = 0
 current_category = ""
 begin_time = 0
 next_time = 0
+# toggles
+toggle_color = False
+toggle_mute = False
 # Directories
 directory_path = os.path.dirname(os.path.realpath(__file__))
 path_to_Work = directory_path + "/Data/Work.json"
@@ -219,79 +222,81 @@ class MainWindow(QMainWindow):
         self.Schedule_Button.setMinimumSize(100, 0)
         self.Schedule_Button.setFont(General_Font)
         # Laying it all out
-        layout = QGridLayout()
-        layout.addWidget(
+        self.layout = QGridLayout()
+        self.layout.addWidget(
             self.Schedule_Label, 0, 0, 1, 4, alignment=Qt.AlignmentFlag.AlignCenter
         )
-        layout.addWidget(
+        self.layout.addWidget(
             self.Current_Category_Text_Label,
             1,
             0,
             alignment=Qt.AlignmentFlag.AlignCenter,
         )
-        layout.addWidget(
+        self.layout.addWidget(
             self.Current_Category_Label, 1, 1, alignment=Qt.AlignmentFlag.AlignCenter
         )
-        layout.addWidget(
+        self.layout.addWidget(
             self.Remaining_Time_Text_Label, 2, 0, alignment=Qt.AlignmentFlag.AlignCenter
         )
-        layout.addWidget(
+        self.layout.addWidget(
             self.Remaining_Time_Label, 2, 1, alignment=Qt.AlignmentFlag.AlignCenter
         )
-        layout.addWidget(
+        self.layout.addWidget(
             self.Next_Category_Text_Label, 3, 0, alignment=Qt.AlignmentFlag.AlignCenter
         )
-        layout.addWidget(
+        self.layout.addWidget(
             self.Next_Category_Label, 3, 1, alignment=Qt.AlignmentFlag.AlignCenter
         )
-        layout.addWidget(
+        self.layout.addWidget(
             self.Current_Step_Text_Label, 4, 0, alignment=Qt.AlignmentFlag.AlignCenter
         )
-        layout.addWidget(
+        self.layout.addWidget(
             self.Current_Step_Label, 4, 1, alignment=Qt.AlignmentFlag.AlignCenter
         )
-        layout.addWidget(
+        self.layout.addWidget(
             self.Current_Activity_Text_Label,
             1,
             2,
             alignment=Qt.AlignmentFlag.AlignCenter,
         )
-        layout.addWidget(
+        self.layout.addWidget(
             self.Current_Activity_Label, 1, 3, alignment=Qt.AlignmentFlag.AlignCenter
         )
-        layout.addWidget(
+        self.layout.addWidget(
             self.Elapsed_Time_Text_Label, 2, 2, alignment=Qt.AlignmentFlag.AlignCenter
         )
-        layout.addWidget(
+        self.layout.addWidget(
             self.Elapsed_Time_Label, 2, 3, alignment=Qt.AlignmentFlag.AlignCenter
         )
-        layout.addWidget(
+        self.layout.addWidget(
             self.Next_Activity_Text_Label, 3, 2, alignment=Qt.AlignmentFlag.AlignCenter
         )
-        layout.addWidget(
+        self.layout.addWidget(
             self.Next_Activity_Label, 3, 3, alignment=Qt.AlignmentFlag.AlignCenter
         )
-        layout.addWidget(
+        self.layout.addWidget(
             self.Total_Steps_Text_Label, 4, 2, alignment=Qt.AlignmentFlag.AlignCenter
         )
-        layout.addWidget(
+        self.layout.addWidget(
             self.Total_Steps_Label, 4, 3, alignment=Qt.AlignmentFlag.AlignCenter
         )
-        layout.addWidget(
+        self.layout.addWidget(
             self.Schedule_Button, 5, 0, alignment=Qt.AlignmentFlag.AlignCenter
         )
-        layout.addWidget(
+        self.layout.addWidget(
             self.Statistics_Button, 5, 1, alignment=Qt.AlignmentFlag.AlignCenter
         )
-        layout.addWidget(
+        self.layout.addWidget(
             self.Options_Button, 5, 2, alignment=Qt.AlignmentFlag.AlignCenter
         )
-        layout.addWidget(self.Stop_Button, 5, 3, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.layout.addWidget(
+            self.Stop_Button, 5, 3, alignment=Qt.AlignmentFlag.AlignCenter
+        )
         # Finalizing Window Parameters
         self.setWindowIcon(QIcon(path_to_icon))
-        self.window = QWidget()
-        self.window.setLayout(layout)
-        self.setCentralWidget(self.window)
+        self.main_window = QWidget()
+        self.main_window.setLayout(self.layout)
+        self.setCentralWidget(self.main_window)
         self.setMinimumSize(self.minimumSizeHint())
         self.setMaximumSize(self.sizeHint())
         # endregion GUI Items
@@ -319,108 +324,104 @@ class MainWindow(QMainWindow):
     # Formating the schedule from the raw JSON file
     def Format_Schedule(self):
         # Getting schedule from JSON in a dictionary
-        unformatted = self.Load_Schedule()
+        self.unformatted = self.Load_Schedule()
         # Variables (Seconds)
-        total_work = 0
-        total_education = 0
-        total_hobby = 0
-        total_essential = 0
-        total_productive = 0
-        total_leisure = 0
-        total_social = 0
-        total_nothing = 0
+        self.total_work = 0
+        self.total_education = 0
+        self.total_hobby = 0
+        self.total_essential = 0
+        self.total_productive = 0
+        self.total_leisure = 0
+        self.total_social = 0
+        self.total_nothing = 0
         # Dictionary for formatted result
-        formatted = {}
+        self.formatted = {}
         # Get information from each part of the schedule
-        for x in unformatted:
+        for x in self.unformatted:
             # Loading Data
-            load_step = int(x)
-            load_category = unformatted[x]["Category"]
-            load_activity = unformatted[x]["Activity"]
-            load_duration = (
-                int(unformatted[x]["Duration"]) * 60
+            self.load_step = int(x)
+            self.load_category = self.unformatted[x]["Category"]
+            self.load_activity = self.unformatted[x]["Activity"]
+            self.load_duration = (
+                int(self.unformatted[x]["Duration"]) * 60
             )  # Multiply by 60 because we need the time in seconds and the schedule is in minutes because I'm a person not a computer
-            load_start = int(unformatted[x]["Start"]) * 60  # Get seconds
-            load_end = int(unformatted[x]["End"]) * 60  # Get seconds
+            self.load_start = int(self.unformatted[x]["Start"]) * 60  # Get seconds
+            self.load_end = int(self.unformatted[x]["End"]) * 60  # Get seconds
             # Getting category times
-            if load_category == "Work":
-                total_work += load_duration
-            elif load_category == "Education":
-                total_education += load_duration
-            elif load_category == "Hobby":
-                total_hobby += load_duration
-            elif load_category == "Essential":
-                total_essential += load_duration
-            elif load_category == "Productive":
-                total_productive += load_duration
-            elif load_category == "Leisure":
-                total_leisure += load_duration
-            elif load_category == "Social":
-                total_social += load_duration
-            elif load_category == "Nothing":
-                total_nothing += load_duration
+            if self.load_category == "Work":
+                self.total_work += self.load_duration
+            elif self.load_category == "Education":
+                self.total_education += self.load_duration
+            elif self.load_category == "Hobby":
+                self.total_hobby += self.load_duration
+            elif self.load_category == "Essential":
+                self.total_essential += self.load_duration
+            elif self.load_category == "Productive":
+                self.total_productive += self.load_duration
+            elif self.load_category == "Leisure":
+                self.total_leisure += self.load_duration
+            elif self.load_category == "Social":
+                self.total_social += self.load_duration
+            elif self.load_category == "Nothing":
+                self.total_nothing += self.load_duration
             # Write to dictionary
-            formatted[load_step] = {
-                "Category": load_category,
-                "Activity": load_activity,
-                "Duration": load_duration,
-                "Start": load_start,
-                "End": load_end,
+            self.formatted[self.load_step] = {
+                "Category": self.load_category,
+                "Activity": self.load_activity,
+                "Duration": self.load_duration,
+                "Start": self.load_start,
+                "End": self.load_end,
             }
         # Saving the total times to a global dictionary
         global total_schedule
-        total_schedule["Work"] = total_work
-        total_schedule["Education"] = total_education
-        total_schedule["Hobby"] = total_hobby
-        total_schedule["Essential"] = total_essential
-        total_schedule["Productive"] = total_productive
-        total_schedule["Lesiure"] = total_leisure
-        total_schedule["Social"] = total_social
-        total_schedule["Nothing"] = total_nothing
+        total_schedule["Work"] = self.total_work
+        total_schedule["Education"] = self.total_education
+        total_schedule["Hobby"] = self.total_hobby
+        total_schedule["Essential"] = self.total_essential
+        total_schedule["Productive"] = self.total_productive
+        total_schedule["Lesiure"] = self.total_leisure
+        total_schedule["Social"] = self.total_social
+        total_schedule["Nothing"] = self.total_nothing
         # Saving variables
         global total_steps
-        total_steps = len(formatted)
+        total_steps = len(self.formatted)
         # Returning schedule results
-        return formatted
+        return self.formatted
 
     # Loading the schedule from JSON files
     def Load_Schedule(self):
-        path_to_use = ""
+        self.path_to_use = ""
         # Getting path from Schedule Type
         if Schedule_Type == "Work":
-            path_to_use = path_to_Work
+            self.path_to_use = path_to_Work
         elif Schedule_Type == "School":
-            path_to_use = path_to_School
+            self.path_to_use = path_to_School
         elif Schedule_Type == "Hobby":
-            path_to_use = path_to_Hobby
+            self.path_to_use = path_to_Hobby
         elif Schedule_Type == "Lesiure":
-            path_to_use = path_to_Lesiure
+            self.path_to_use = path_to_Lesiure
         elif Schedule_Type == "Vacation":
-            path_to_use = path_to_Vacation
+            self.path_to_use = path_to_Vacation
         elif Schedule_Type == "Sick":
-            path_to_use = path_to_Sick
+            self.path_to_use = path_to_Sick
         elif Schedule_Type == "Work (School)":
-            path_to_use = path_to_Work_p0Schoolp0
+            self.path_to_use = path_to_Work_p0Schoolp0
         elif Schedule_Type == "Hobby (School)":
-            path_to_use = path_to_Hobby_p0Schoolp0
+            self.path_to_use = path_to_Hobby_p0Schoolp0
         elif Schedule_Type == "Leisure (School)":
-            path_to_use = path_to_Leisure_p0Schoolp0
+            self.path_to_use = path_to_Leisure_p0Schoolp0
         elif Schedule_Type == "Work & School":
-            path_to_use = path_to_Work_a0_School
+            self.path_to_use = path_to_Work_a0_School
         elif Schedule_Type == "Hobby & Leisure":
-            path_to_use = path_to_Hobby_a0_Leisure
+            self.path_to_use = path_to_Hobby_a0_Leisure
         # Loading the schedule
-        with open(path_to_use) as temp_file:
-            loaded_time = json.load(temp_file)
-        return loaded_time
+        with open(self.path_to_use) as temp_file:
+            self.loaded_time = json.load(temp_file)
+        return self.loaded_time
 
     # Main Timer Logic
     def Timing(self):
         self.Check_Time()
-
-    ### Timer for Repeated Events & Running This###
-    timer = QTimer()
-    timer.timeout.connect(Timing)
 
     ### Checking Time ###
     def Check_Time(self):
@@ -459,32 +460,32 @@ class MainWindow(QMainWindow):
     # Getting current time
     def get_time(self):
         # Getting current time
-        now = datetime.now()
+        self.now = datetime.now()
         # Getting time at midnight
-        midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        self.midnight = self.now.replace(hour=0, minute=0, second=0, microsecond=0)
         # Getting seconds today
-        seconds_today = (now - midnight).seconds
-        return seconds_today
+        self.seconds_today = (self.now - self.midnight).seconds
+        return self.seconds_today
 
     # Getting initial step
     def get_step(self, time):
         # Iterating through the schedule to find the right activity for the time
         for x in schedule_data:
             # Getting the start and end time
-            start_time = schedule_data[x]["Start"]
-            end_time = schedule_data[x]["End"]
-            schedule_category = schedule_data[x]["Category"]
+            self.start_time = schedule_data[x]["Start"]
+            self.end_time = schedule_data[x]["End"]
+            self.schedule_category = schedule_data[x]["Category"]
             # Returning when the current time falls between the start and end times
-            if time >= start_time and time <= end_time:
+            if time >= self.start_time and time <= self.end_time:
                 # Getting the amount of passed time from the current activity
-                schedule_duration = time - start_time
-                self.save_to_elapsed(schedule_category, schedule_duration)
+                self.schedule_duration = time - self.start_time
+                self.save_to_elapsed(self.schedule_category, self.schedule_duration)
                 # Returning the step
                 return x
             else:
                 # Adding the elapsed time to the elapsed dictionary
-                schedule_duration = schedule_data[x]["Duration"]
-                self.save_to_elapsed(schedule_category, schedule_duration)
+                self.schedule_duration = schedule_data[x]["Duration"]
+                self.save_to_elapsed(self.schedule_category, self.schedule_duration)
 
     # Save to elapsed dictionary
     def save_to_elapsed(self, Elapsed_Category, Elapsed_Time):
@@ -519,6 +520,12 @@ class MainWindow(QMainWindow):
         begin_time = schedule_data[current_step]["Start"]
         # Getting the next category
         current_category = schedule_data[current_step]["Category"]
+        # Play chime
+        if toggle_mute == False:
+            self.Play_Chime()
+        # Change color
+        if toggle_color == False:
+            self.Change_Color(False)
 
     # Updating labels that stay unchanged for long periods of time
     def update_long_labels(self):
@@ -547,12 +554,48 @@ class MainWindow(QMainWindow):
         self.get_next_time()
         # Updating long labels
         self.update_long_labels()
-        # Play chime
-        self.Play_Chime()
 
     # Play chime, possibly could have more types in the future for each category
     def Play_Chime(self):
-        chime_sound.play()
+        if current_category == "Work":
+            chime_sound.play()
+        elif current_category == "Education":
+            chime_sound.play()
+        elif current_category == "Hobby":
+            chime_sound.play()
+        elif current_category == "Essential":
+            chime_sound.play()
+        elif current_category == "Productive":
+            chime_sound.play()
+        elif current_category == "Leisure":
+            chime_sound.play()
+        elif current_category == "Social":
+            chime_sound.play()
+        elif current_category == "Nothing":
+            chime_sound.play()
+
+    # Change the color of the window
+    def Change_Color(self, clearing):
+        if clearing == False:
+            if current_category == "Work":
+                self.current_color = "lightgreen"
+            elif current_category == "Education":
+                self.current_color = "lightskyblue"
+            elif current_category == "Hobby":
+                self.current_color = "paleturquoise"
+            elif current_category == "Essential":
+                self.current_color = "peachpuff"
+            elif current_category == "Productive":
+                self.current_color = "lemonchiffon"
+            elif current_category == "Leisure":
+                self.current_color = "plum"
+            elif current_category == "Social":
+                self.current_color = "lightsalmon"
+            elif current_category == "Nothing":
+                self.current_color = "lightcoral"
+        else:
+            self.current_color = " "
+        self.main_window.setStyleSheet(f"background-color: {self.current_color}")
 
     # Stopping Schedule
     def Stop_Schedule(self, button):
@@ -636,7 +679,9 @@ class MainWindow(QMainWindow):
         pass
 
     def Open_Options(self):
-        pass
+        # Making and showing a new window. Send over this main window with it so that it can send back calls
+        self.w = Options_Window(self)
+        self.w.show()
 
     def Open_Stop(self):
         # Setting up gui
@@ -665,61 +710,64 @@ class Schedule_View(QWidget):
     def __init__(self):
         super().__init__()
         # region GUI Items
-        Main_Label = QLabel(f"<h1>{Schedule_Type} Schedule</h1>", parent=self)
+        self.Main_Label = QLabel(f"<h1>{Schedule_Type} Schedule</h1>", parent=self)
         # Setting up Table
-        schedule_table = QTableWidget()
-        schedule_table.setRowCount(len(schedule_data))
-        schedule_table.setColumnCount(6)
-        schedule_table.setHorizontalHeaderLabels(
+        self.schedule_table = QTableWidget()
+        self.schedule_table.setRowCount(len(schedule_data))
+        self.schedule_table.setColumnCount(6)
+        self.schedule_table.setHorizontalHeaderLabels(
             ["Step", "Category", "Activity", "Duration", "Start", "End"]
         )
+        self.schedule_table.setEditTriggers(
+            QTableWidget.EditTrigger(0)
+        )  # Disables editing
         # Writing labels for each schedule entry
         for x in schedule_data:
-            step_text = QTableWidgetItem(str(x))
-            category_text = QTableWidgetItem(schedule_data[x]["Category"])
-            activity_text = QTableWidgetItem(str(schedule_data[x]["Activity"]))
-            duration_text = QTableWidgetItem(
+            self.step_text = QTableWidgetItem(str(x))
+            self.category_text = QTableWidgetItem(schedule_data[x]["Category"])
+            self.activity_text = QTableWidgetItem(str(schedule_data[x]["Activity"]))
+            self.duration_text = QTableWidgetItem(
                 datetime.utcfromtimestamp(schedule_data[x]["Duration"]).strftime(
                     "%H:%M:%S"
                 )
             )
-            start_text = QTableWidgetItem(
+            self.start_text = QTableWidgetItem(
                 datetime.utcfromtimestamp(schedule_data[x]["Start"]).strftime(
                     "%H:%M:%S"
                 )
             )
-            end_text = QTableWidgetItem(
+            self.end_text = QTableWidgetItem(
                 datetime.utcfromtimestamp(schedule_data[x]["End"]).strftime("%H:%M:%S")
             )
-            schedule_table.setItem(x - 1, 0, step_text)
-            schedule_table.setItem(x - 1, 1, category_text)
-            schedule_table.setItem(x - 1, 2, activity_text)
-            schedule_table.setItem(x - 1, 3, duration_text)
-            schedule_table.setItem(x - 1, 4, start_text)
-            schedule_table.setItem(x - 1, 5, end_text)
+            self.schedule_table.setItem(x - 1, 0, self.step_text)
+            self.schedule_table.setItem(x - 1, 1, self.category_text)
+            self.schedule_table.setItem(x - 1, 2, self.activity_text)
+            self.schedule_table.setItem(x - 1, 3, self.duration_text)
+            self.schedule_table.setItem(x - 1, 4, self.start_text)
+            self.schedule_table.setItem(x - 1, 5, self.end_text)
         # Setting up the layout
-        Schedule_Layout = QGridLayout()
-        Main_Label.setMinimumSize(100, 0)
-        Main_Label.setFont(General_Font)
-        Schedule_Layout.addWidget(
-            Main_Label, 0, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignCenter
+        self.Schedule_Layout = QGridLayout()
+        self.Main_Label.setMinimumSize(100, 0)
+        self.Main_Label.setFont(General_Font)
+        self.Schedule_Layout.addWidget(
+            self.Main_Label, 0, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignCenter
         )
-        schedule_table.setColumnWidth(0, 25)
-        schedule_table.setColumnWidth(1, 85)
-        schedule_table.setColumnWidth(2, 275)
-        schedule_table.setColumnWidth(3, 75)
-        schedule_table.setColumnWidth(4, 75)
-        schedule_table.setColumnWidth(5, 75)
-        schedule_table.setMinimumSize(665, 400)
-        schedule_table.setFont(General_Font)
-        Schedule_Layout.addWidget(
-            schedule_table, 1, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignCenter
+        self.schedule_table.setColumnWidth(0, 25)
+        self.schedule_table.setColumnWidth(1, 85)
+        self.schedule_table.setColumnWidth(2, 275)
+        self.schedule_table.setColumnWidth(3, 75)
+        self.schedule_table.setColumnWidth(4, 75)
+        self.schedule_table.setColumnWidth(5, 75)
+        self.schedule_table.setMinimumSize(665, 400)
+        self.schedule_table.setFont(General_Font)
+        self.Schedule_Layout.addWidget(
+            self.schedule_table, 1, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignCenter
         )
         # endregion GUI Items
         # Setting up window
         self.setWindowIcon(QIcon(path_to_icon))
         self.setWindowTitle("Schedule")
-        self.setLayout(Schedule_Layout)
+        self.setLayout(self.Schedule_Layout)
         self.setMinimumSize(self.minimumSizeHint())
         self.setMaximumSize(self.sizeHint())
 
@@ -730,6 +778,88 @@ class Schedule_View(QWidget):
 # Class for the Stopping Prompt
 
 # Class for the Options Prompt
+class Options_Window(QWidget):
+    # Init Function with the main window attacked
+    def __init__(self, main_window):
+        super().__init__()
+        # region GUI Items
+        self.Main_Label = QLabel("<h1>Options</h1>", parent=self)
+        self.Mute_Label = QLabel("Mute:", parent=self)
+        self.Color_Label = QLabel("Colors:", parent=self)
+        self.Mute_Button = QPushButton("Mute", parent=self)
+        self.Color_Button = QPushButton("Color", parent=self)
+        # Setting up the layout
+        self.Options_Layout = QGridLayout()
+        self.Main_Label.setMinimumSize(100, 0)
+        self.Main_Label.setFont(General_Font)
+        self.Options_Layout.addWidget(
+            self.Main_Label, 0, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignCenter
+        )
+        self.Mute_Label.setMinimumSize(100, 0)
+        self.Mute_Label.setFont(General_Font)
+        self.Options_Layout.addWidget(
+            self.Mute_Label, 1, 0, 1, 1, alignment=Qt.AlignmentFlag.AlignCenter
+        )
+        self.Mute_Button.setMinimumSize(100, 0)
+        self.Mute_Button.setFont(General_Font)
+        self.Options_Layout.addWidget(
+            self.Mute_Button, 1, 1, 1, 1, alignment=Qt.AlignmentFlag.AlignCenter
+        )
+        self.Color_Label.setMinimumSize(100, 0)
+        self.Color_Label.setFont(General_Font)
+        self.Options_Layout.addWidget(
+            self.Color_Label, 2, 0, 1, 1, alignment=Qt.AlignmentFlag.AlignCenter
+        )
+        self.Color_Button.setMinimumSize(100, 0)
+        self.Color_Button.setFont(General_Font)
+        self.Options_Layout.addWidget(
+            self.Color_Button, 2, 1, 1, 1, alignment=Qt.AlignmentFlag.AlignCenter
+        )
+        # Changing button text depending on the variable
+        if toggle_mute == False:
+            self.Mute_Button.setText("Mute")
+        else:
+            self.Mute_Button.setText("Un-Mute")
+        if toggle_color == False:
+            self.Color_Button.setText("Color")
+        else:
+            self.Color_Button.setText("No Color")
+        # Setting up window
+        self.setWindowIcon(QIcon(path_to_icon))
+        self.setWindowTitle("Schedule Alerts")
+        self.setLayout(self.Options_Layout)
+        self.setMinimumSize(self.minimumSizeHint())
+        self.setMaximumSize(self.sizeHint())
+        # endregion GUI Items
+        # Button Events
+        self.Mute_Button.clicked.connect(self.Toggle_Mute)
+        # Running the input though lambda because you can't pass argument through connect or something
+        self.Color_Button.clicked.connect(lambda: self.Toggle_Color(main_window))
+
+    # Toggling Mute of the chime
+    def Toggle_Mute(self):
+        global toggle_mute
+        if toggle_mute == False:
+            toggle_mute = True
+            self.Mute_Button.setText("Un-Mute")
+        else:
+            toggle_mute = False
+            self.Mute_Button.setText("Mute")
+
+    # Toggling Mute of the color (with the main window carried over)
+    def Toggle_Color(self, main_window):
+        global toggle_color
+        if toggle_color == False:
+            toggle_color = True
+            self.Color_Button.setText("No Color")
+            # Running the function in the main window
+            main_window.Change_Color(True)
+        else:
+            toggle_color = False
+            self.Color_Button.setText("Color")
+            # Running the function in the main window
+            main_window.Change_Color(False)
+
 
 # Starting Program
 app = QApplication([])
