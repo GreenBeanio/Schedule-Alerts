@@ -633,13 +633,10 @@ class MainWindow(QMainWindow):
     # Button Functions
 
     def Open_Statistics(self):
-        statistics_window = QWidget()
-        statistics_window.setWindowTitle("Statistics")
+        pass
 
     def Open_Options(self):
-        # Setting up gui
-        options_window = QWidget()
-        options_window.setWindowTitle("Options")
+        pass
 
     def Open_Stop(self):
         # Setting up gui
@@ -657,17 +654,28 @@ class MainWindow(QMainWindow):
         dialog.exec()
 
     def Open_Schedule(self):
-        # Setting up gui
-        schedule_window = QTableWidget()
-        schedule_window.setWindowTitle("Schedule")
-        schedule_window.setRowCount(len(schedule_data))
-        schedule_window.setColumnCount(6)
-        schedule_window.setHorizontalHeaderLabels(
+        # Making and showing a new window
+        self.w = Schedule_View()
+        self.w.show()
+
+
+# Class for the Schedule View
+class Schedule_View(QWidget):
+    # Init Function
+    def __init__(self):
+        super().__init__()
+        # region GUI Items
+        Main_Label = QLabel(f"<h1>{Schedule_Type} Schedule</h1>", parent=self)
+        # Setting up Table
+        schedule_table = QTableWidget()
+        schedule_table.setRowCount(len(schedule_data))
+        schedule_table.setColumnCount(6)
+        schedule_table.setHorizontalHeaderLabels(
             ["Step", "Category", "Activity", "Duration", "Start", "End"]
         )
         # Writing labels for each schedule entry
         for x in schedule_data:
-            step_text = QTableWidgetItem(x)
+            step_text = QTableWidgetItem(str(x))
             category_text = QTableWidgetItem(schedule_data[x]["Category"])
             activity_text = QTableWidgetItem(str(schedule_data[x]["Activity"]))
             duration_text = QTableWidgetItem(
@@ -683,14 +691,45 @@ class MainWindow(QMainWindow):
             end_text = QTableWidgetItem(
                 datetime.utcfromtimestamp(schedule_data[x]["End"]).strftime("%H:%M:%S")
             )
-            schedule_window.setItem(x, 0, step_text)
-            schedule_window.setItem(x, 1, category_text)
-            schedule_window.setItem(x, 2, activity_text)
-            schedule_window.setItem(x, 3, duration_text)
-            schedule_window.setItem(x, 4, start_text)
-            schedule_window.setItem(x, 4, end_text)
-            schedule_window.show()
+            schedule_table.setItem(x - 1, 0, step_text)
+            schedule_table.setItem(x - 1, 1, category_text)
+            schedule_table.setItem(x - 1, 2, activity_text)
+            schedule_table.setItem(x - 1, 3, duration_text)
+            schedule_table.setItem(x - 1, 4, start_text)
+            schedule_table.setItem(x - 1, 5, end_text)
+        # Setting up the layout
+        Schedule_Layout = QGridLayout()
+        Main_Label.setMinimumSize(100, 0)
+        Main_Label.setFont(General_Font)
+        Schedule_Layout.addWidget(
+            Main_Label, 0, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignCenter
+        )
+        schedule_table.setColumnWidth(0, 25)
+        schedule_table.setColumnWidth(1, 85)
+        schedule_table.setColumnWidth(2, 275)
+        schedule_table.setColumnWidth(3, 75)
+        schedule_table.setColumnWidth(4, 75)
+        schedule_table.setColumnWidth(5, 75)
+        schedule_table.setMinimumSize(665, 400)
+        schedule_table.setFont(General_Font)
+        Schedule_Layout.addWidget(
+            schedule_table, 1, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignCenter
+        )
+        # endregion GUI Items
+        # Setting up window
+        self.setWindowIcon(QIcon(path_to_icon))
+        self.setWindowTitle("Schedule")
+        self.setLayout(Schedule_Layout)
+        self.setMinimumSize(self.minimumSizeHint())
+        self.setMaximumSize(self.sizeHint())
 
+
+# Class for the Statistics View
+
+
+# Class for the Stopping Prompt
+
+# Class for the Options Prompt
 
 # Starting Program
 app = QApplication([])
