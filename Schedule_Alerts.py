@@ -460,7 +460,7 @@ class MainWindow(QMainWindow):
                 self.advance_step()
         elif current_step == total_steps:
             if seconds_today >= next_time:
-                self.Stop_Schedule()  # Stopping when day ends, probably have some kind of screen pop up in the future
+                self.Stop_Schedule()  # Stopping when day ends
         # Math to find elapsed and remainting time per activity
         current_elapsed_time = seconds_today - begin_time
         current_remaining_time = next_time - seconds_today
