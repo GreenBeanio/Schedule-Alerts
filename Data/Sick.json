@@ -8,7 +8,7 @@
     },
     "2": {
         "Category": "Nothing",
-        "Activity": "Laying in bed waking up",
+        "Activity": "Lying in bed waking up",
         "Duration": "15",
         "Start": "360",
         "End": "375"
@@ -43,7 +43,7 @@
     },
     "7": {
         "Category": "Leisure",
-        "Activity": "Entertainment",
+        "Activity": "Shows or Movies",
         "Duration": "60",
         "Start": "410",
         "End": "470"
@@ -64,7 +64,7 @@
     },
     "10": {
         "Category": "Leisure",
-        "Activity": "Entertainment",
+        "Activity": "Shows or Movies",
         "Duration": "240",
         "Start": "490",
         "End": "730"
@@ -92,7 +92,7 @@
     },
     "14": {
         "Category": "Leisure",
-        "Activity": "Entertainment",
+        "Activity": "Shows or Movies",
         "Duration": "340",
         "Start": "760",
         "End": "1100"
@@ -120,7 +120,7 @@
     },
     "18": {
         "Category": "Leisure",
-        "Activity": "Entertainment",
+        "Activity": "Shows or Movies",
         "Duration": "140",
         "Start": "1140",
         "End": "1280"
@@ -148,7 +148,7 @@
     },
     "22": {
         "Category": "Nothing",
-        "Activity": "Laying in bed falling asleep",
+        "Activity": "Lying in bed falling asleep",
         "Duration": "15",
         "Start": "1305",
         "End": "1320"

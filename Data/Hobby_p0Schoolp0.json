@@ -8,7 +8,7 @@
     },
     "2": {
         "Category": "Nothing",
-        "Activity": "Laying in bed waking up",
+        "Activity": "Lying in bed waking up",
         "Duration": "15",
         "Start": "360",
         "End": "375"
@@ -36,7 +36,7 @@
     },
     "6": {
         "Category": "Leisure",
-        "Activity": "Entertainment",
+        "Activity": "Shows or Movies",
         "Duration": "10",
         "Start": "400",
         "End": "410"
@@ -106,7 +106,7 @@
     },
     "16": {
         "Category": "Leisure",
-        "Activity": "Lunch Break [Entertainment]",
+        "Activity": "Lunch Break [Shows or Movies]",
         "Duration": "30",
         "Start": "770",
         "End": "800"
@@ -162,7 +162,7 @@
     },
     "24": {
         "Category": "Essential",
-        "Activity": "Exercise",
+        "Activity": "Exercise or Meditation",
         "Duration": "30",
         "Start": "1070",
         "End": "1100"
@@ -197,7 +197,7 @@
     },
     "29": {
         "Category": "Leisure",
-        "Activity": "Entertainment",
+        "Activity": "Shows or Movies",
         "Duration": "20",
         "Start": "1200",
         "End": "1220"
@@ -232,7 +232,7 @@
     },
     "34": {
         "Category": "Nothing",
-        "Activity": "Laying in bed falling asleep",
+        "Activity": "Lying in bed falling asleep",
         "Duration": "15",
         "Start": "1305",
         "End": "1320"
