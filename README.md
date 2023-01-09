@@ -30,7 +30,7 @@ The 8 categories are:
         - Examples: Sleeping, Eating, Bathroom, Exercise, Meditation
 5. Productive
     - Activies that need to be done.
-        - Examples: Driving, Cooking, Chores
+        - Examples: Driving, Cooking, Cleaning, Chores
 5. Leisure
     - Activities that lead to the consumption of something.
         - Examples: Shows, Movies, Reading, Video games, Sports
