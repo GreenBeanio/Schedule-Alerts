@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # region Imports
 from datetime import datetime
-from genericpath import exists
 import sys
 import simpleaudio as sa
 from PyQt6.QtCore import Qt, QTimer, QObject
